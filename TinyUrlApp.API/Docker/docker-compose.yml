@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: tinyurl_postgres
+    environment:
+      POSTGRES_USER: tinyurl_user
+      POSTGRES_PASSWORD: tinyurl_pass
+      POSTGRES_DB: tinyurl_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

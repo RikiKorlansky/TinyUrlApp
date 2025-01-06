@@ -2,11 +2,12 @@
 
 public class ShortUrl
 {
-    public Guid Id { get; private set; }
-    public string ShortUrlCode { get; private set; }
-    public string LongUrl { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-
+    public Guid Id { get; set; }
+    public string ShortUrlCode { get; set; } = null!;
+    public string? LongUrl { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsUsed { get; set; } = false;
+    
     private ShortUrl() { } 
 
     public ShortUrl(string longUrl)

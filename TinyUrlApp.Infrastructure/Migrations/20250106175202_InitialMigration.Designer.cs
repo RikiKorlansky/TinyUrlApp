@@ -12,8 +12,8 @@ using TinyUrlApp.Infrastructure;
 namespace TinyUrlApp.Infrastructure.Migrations
 {
     [DbContext(typeof(TinyUrlDbContext))]
-    [Migration("20250106163205_AddUrlPoolsTable")]
-    partial class AddUrlPoolsTable
+    [Migration("20250106175202_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,8 +34,10 @@ namespace TinyUrlApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LongUrl")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ShortUrlCode")

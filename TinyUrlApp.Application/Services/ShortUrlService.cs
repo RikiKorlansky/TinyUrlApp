@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TinyUrlApp.Domain.Entities;
 using TinyUrlApp.Infrastructure;
 
 public class ShortUrlService : IShortUrlService
@@ -36,7 +37,30 @@ public class ShortUrlService : IShortUrlService
         await _context.UrlPools.AddRangeAsync(urls);
         await _context.SaveChangesAsync();
     }
+    public async Task<string?> GetShortUrlAsync(string url)
+    {
+        var unusedUrl = await _context.UrlPools
+            .FirstOrDefaultAsync(u => !u.IsUsed);
 
+        if (unusedUrl == null)
+        {
+            return null; 
+        }
+
+        unusedUrl.IsUsed = true;
+        unusedUrl.LongUrl = url;
+        await _context.SaveChangesAsync();
+
+        return unusedUrl.ShortUrlCode;
+    }
+
+    public async Task<string?> GetLongUrlAsync(string shortUrlCode)
+    {
+        var urlRecord = await _context.UrlPools
+            .FirstOrDefaultAsync(u => u.ShortUrlCode == shortUrlCode);
+
+        return urlRecord?.LongUrl; 
+    }
     private string IncrementShortUrl(string current, int incrementBy = 1)
     {
         var charArray = current.ToCharArray();
@@ -58,3 +82,5 @@ public class ShortUrlService : IShortUrlService
         return new string(charArray);
     }
 }
+
+

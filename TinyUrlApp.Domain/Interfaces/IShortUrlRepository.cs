@@ -1,9 +1,10 @@
 ﻿using TinyUrlApp.Domain.Entities;
 
-namespace TinyUrlApp.Domain.Interfaces;
-
-public interface IShortUrlRepository
+namespace TinyUrlApp.Domain.Interfaces
 {
-    Task<ShortUrl?> GetByShortCodeAsync(string shortCode);
-    Task AddAsync(ShortUrl shortUrl);
+    public interface IShortUrlRepository
+    {
+        Task<ShortUrl?> GetByShortCodeAsync(string shortCode);
+        Task AddAsync(ShortUrl shortUrl);
+    }
 }

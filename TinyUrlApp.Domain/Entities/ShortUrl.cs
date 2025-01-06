@@ -7,7 +7,7 @@ public class ShortUrl
     public string LongUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    private ShortUrl() { } // דרוש ל-EF Core
+    private ShortUrl() { } 
 
     public ShortUrl(string longUrl)
     {

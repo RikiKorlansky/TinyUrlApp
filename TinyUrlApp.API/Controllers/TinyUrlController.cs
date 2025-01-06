@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TinyUrlApp.Application.Services;
 
 namespace TinyUrlApp.API.Controllers;
 
@@ -7,25 +6,18 @@ namespace TinyUrlApp.API.Controllers;
 [ApiController]
 public class TinyUrlController : ControllerBase
 {
-    private readonly ShortUrlService _service;
+    private readonly IShortUrlService _shortUrlService;
+
 
     public TinyUrlController(ShortUrlService service)
     {
-        _service = service;
+        _shortUrlService = service;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateShortUrl([FromBody] string longUrl)
+    [HttpPost("generate")]
+    public async Task<IActionResult> GenerateShortUrls(int batchSize = 1_000_000)
     {
-        var shortCode = await _service.CreateShortUrlAsync(longUrl);
-        return Ok(new { shortUrl = shortCode });
-    }
-
-    [HttpGet("{shortCode}")]
-    public async Task<IActionResult> GetLongUrl(string shortCode)
-    {
-        var longUrl = await _service.GetLongUrlAsync(shortCode);
-        if (longUrl == null) return NotFound();
-        return Ok(new { longUrl });
+        await _shortUrlService.GenerateSequentialShortUrlsAsync(batchSize);
+        return Ok("Short URLs generated successfully!");
     }
 }

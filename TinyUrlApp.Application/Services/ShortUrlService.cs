@@ -1,27 +1,60 @@
-﻿using TinyUrlApp.Domain.Entities;
-using TinyUrlApp.Domain.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using TinyUrlApp.Infrastructure;
 
-namespace TinyUrlApp.Application.Services;
-
-public class ShortUrlService
+public class ShortUrlService : IShortUrlService
 {
-    private readonly IShortUrlRepository _repository;
+    private readonly TinyUrlDbContext _context;
+    private const string CharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    public ShortUrlService(IShortUrlRepository repository)
+    public ShortUrlService(TinyUrlDbContext context)
     {
-        _repository = repository;
+        _context = context;
     }
 
-    public async Task<string> CreateShortUrlAsync(string longUrl)
+    public async Task GenerateSequentialShortUrlsAsync(int batchSize)
     {
-        var shortUrl = new ShortUrl(longUrl);
-        await _repository.AddAsync(shortUrl);
-        return shortUrl.ShortUrlCode;
+        // get last url
+        var lastShortUrl = await _context.UrlPools
+            .OrderByDescending(u => u.ShortUrlCode)
+            .Select(u => u.ShortUrlCode)
+            .FirstOrDefaultAsync();
+
+        // create new urls
+        var startCode = string.IsNullOrEmpty(lastShortUrl) ? "AAAAAAA" : IncrementShortUrl(lastShortUrl);
+
+        // create urls group
+        var urls = Enumerable.Range(0, batchSize)
+            .Select(i => new UrlPool
+            {
+                Id = Guid.NewGuid(),
+                ShortUrlCode = IncrementShortUrl(startCode, i),
+                LongUrl = string.Empty,
+                CreatedAt = DateTime.UtcNow
+            }).ToList();
+
+        // insert urls to DB
+        await _context.UrlPools.AddRangeAsync(urls);
+        await _context.SaveChangesAsync();
     }
 
-    public async Task<string?> GetLongUrlAsync(string shortCode)
+    private string IncrementShortUrl(string current, int incrementBy = 1)
     {
-        var shortUrl = await _repository.GetByShortCodeAsync(shortCode);
-        return shortUrl?.LongUrl;
+        var charArray = current.ToCharArray();
+        var length = charArray.Length;
+        var carry = incrementBy;
+
+        for (var i = length - 1; i >= 0 && carry > 0; i--)
+        {
+            var index = CharSet.IndexOf(charArray[i]) + carry;
+            charArray[i] = CharSet[index % CharSet.Length];
+            carry = index / CharSet.Length;
+        }
+
+        if (carry > 0)
+        {
+            return new string(CharSet[0], 1) + new string(charArray);
+        }
+
+        return new string(charArray);
     }
 }

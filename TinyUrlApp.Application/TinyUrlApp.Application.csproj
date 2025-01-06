@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TinyUrlApp.Domain\TinyUrlApp.Domain.csproj" />
+    <ProjectReference Include="..\TinyUrlApp.Infrastructure\TinyUrlApp.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
